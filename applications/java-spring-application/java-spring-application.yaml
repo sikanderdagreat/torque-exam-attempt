@@ -1,0 +1,49 @@
+---
+spec_version: 1
+kind: application
+
+source:
+  os_type: linux
+  image:
+    ami:
+      - id: ami-03ef731cc103c9f09
+        region: eu-west-1
+        username: ubuntu
+    azure_image:
+      - urn: Canonical:UbuntuServer:16.04-LTS:latest
+        username: adminuser
+    docker_image:
+      - tag: 16.04
+        name: ubuntu
+
+
+inputs:
+  - DB_NAME
+  - DB_HOSTNAME
+  - DB_USERNAME
+  - DB_PASSWORD
+  - WEB_SERVER_PORT
+  - INSTANCETYPE: t2.medium,t3.medium
+  - WEB_SERVER_CONFIG_PATH: /home/user/.config/colony-java-spring-sample
+
+configuration:
+  healthcheck:
+    script: healthcheck.sh
+    timeout: 1500
+  start: 
+    script: java-spring-application.sh
+
+infrastructure:
+  compute:
+    spec:
+      aws:
+        instance_type: $INSTANCETYPE
+      azure:
+        vm_size: Basic_A2
+  connectivity:
+    external:
+      - port_info:
+          port: $WEB_SERVER_PORT
+
+debugging:
+  connection_protocol: SSH
